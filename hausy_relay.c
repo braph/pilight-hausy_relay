@@ -190,6 +190,8 @@ static int createCode(struct JsonNode *code) {
       hausy_relay->raw
    );
 
+   hausy_relay->txrpt = REPEATS;
+
    if (command == RELAY_CMD_ON)
       createMessage(systemcode_str, unitcode_str, 1);
    else if (command == RELAY_CMD_OFF)
