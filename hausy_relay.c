@@ -62,9 +62,9 @@ static void createMessage(char *systemcode_str, char *unitcode_str, int state) {
    json_append_member(hausy_relay->message, "unitcode", json_mkstring(unitcode_str));
 
    if (state) {
-      json_append_member(hausy_relay->message, "state", json_mkstring("on"));
+      json_append_member(hausy_relay->message, "state", json_mkstring("up"));
    } else {
-      json_append_member(hausy_relay->message, "state", json_mkstring("off"));
+      json_append_member(hausy_relay->message, "state", json_mkstring("down"));
    }
 }
 
@@ -139,9 +139,9 @@ static int createCode(struct JsonNode *code) {
       unitcode = hausy_parse_id(unitcode_str);
    }
 
-   if(json_find_number(code, "off", &itmp) == 0)
+   if(json_find_number(code, "down", &itmp) == 0)
       command = RELAY_CMD_OFF;
-   else if(json_find_number(code, "on", &itmp) == 0)
+   else if(json_find_number(code, "up", &itmp) == 0)
       command = RELAY_CMD_ON;
    else if(json_find_number(code, "query", &itmp) == 0)
       command = RELAY_CMD_STATE_QUERY;
@@ -218,7 +218,7 @@ void hausyRelayInit(void) {
    protocol_register(&hausy_relay);
    protocol_set_id(hausy_relay, "hausy_relay");
    protocol_device_add(hausy_relay, "hausy_relay", "Hausy Relays");
-   hausy_relay->devtype = SWITCH;
+   hausy_relay->devtype = SCREEN;
    hausy_relay->hwtype = RF433;
    hausy_relay->minrawlen = MIN_RAW_LENGTH;
    hausy_relay->maxrawlen = MAX_RAW_LENGTH;
@@ -228,8 +228,8 @@ void hausyRelayInit(void) {
 
    options_add(&hausy_relay->options, 's', "systemcode", OPTION_HAS_VALUE, DEVICES_ID, JSON_STRING, NULL, "^0a[0-9a-zA-Z_@]{1,5}$");
    options_add(&hausy_relay->options, 'u', "unitcode", OPTION_HAS_VALUE, DEVICES_ID, JSON_STRING, NULL, "^0a[0-9a-zA-Z_@]{1,5}$");
-   options_add(&hausy_relay->options, 't', "on", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
-   options_add(&hausy_relay->options, 'f', "off", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
+   options_add(&hausy_relay->options, 't', "up", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
+   options_add(&hausy_relay->options, 'f', "down", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
    options_add(&hausy_relay->options, 'q', "query", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
 
    options_add(&hausy_relay->options, 0, "readonly", OPTION_HAS_VALUE, GUI_SETTING, JSON_NUMBER, (void *)0, "^[10]{1}$");
