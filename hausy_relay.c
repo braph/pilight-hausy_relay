@@ -206,8 +206,8 @@ void hausyRelayInit(void) {
    //hausy_relay->maxgaplen = MAX_PULSE_LENGTH*PULSE_DIV;
    //hausy_relay->mingaplen = MIN_PULSE_LENGTH*PULSE_DIV;
 
-   options_add(&hausy_relay->options, 's', "systemcode", OPTION_HAS_VALUE, DEVICES_ID, JSON_STRING, NULL, "^0a[0-9a-zA-Z_@]{5}$");
-   options_add(&hausy_relay->options, 'u', "unitcode", OPTION_HAS_VALUE, DEVICES_ID, JSON_STRING, NULL, "^0a[0-9a-zA-Z_@]{5}$");
+   options_add(&hausy_relay->options, 's', "systemcode", OPTION_HAS_VALUE, DEVICES_ID, JSON_STRING, NULL, "^0a[0-9a-zA-Z_@]{1,5}$");
+   options_add(&hausy_relay->options, 'u', "unitcode", OPTION_HAS_VALUE, DEVICES_ID, JSON_STRING, NULL, "^0a[0-9a-zA-Z_@]{1,5}$");
    options_add(&hausy_relay->options, 't', "on", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
    options_add(&hausy_relay->options, 'f', "off", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
 
