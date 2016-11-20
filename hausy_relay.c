@@ -40,7 +40,7 @@
 #include "hausy/protocols/relay/relay.h"
 #include "hausy_relay.h"
 
-#define REPEATS            5
+#define REPEATS            10
 #define MIN_PULSE_LENGTH   HAUSY_PULSE_LOW  - HAUSY_PULSE_TOLERANCE
 #define MAX_PULSE_LENGTH   HAUSY_PULSE_HIGH + HAUSY_PULSE_TOLERANCE
 #define MIN_RAW_LENGTH     ((4 * HAUSY_ID_BITLENGTH * 2) + 2)
