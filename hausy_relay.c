@@ -123,7 +123,7 @@ static void parseCode(void) {
 static int createCode(struct JsonNode *code) {
    int systemcode = -1;
    int unitcode = -1;
-   int state = -1;
+   int command = -1;
    double itmp = 0;
    char *stmp;
    char systemcode_str[10];
@@ -140,11 +140,13 @@ static int createCode(struct JsonNode *code) {
    }
 
    if(json_find_number(code, "off", &itmp) == 0)
-      state = 0;
+      command = RELAY_CMD_OFF;
    else if(json_find_number(code, "on", &itmp) == 0)
-      state = 1;
+      command = RELAY_CMD_ON;
+   else if(json_find_number(code, "query", &itmp) == 0)
+      command = RELAY_CMD_STATE_QUERY;
 
-   if(systemcode == -1 || unitcode == -1 || state == -1) {
+   if(systemcode == -1 || unitcode == -1 || command == -1) {
       logprintf(LOG_ERR, "hausy_relay: insufficient number of arguments");
       return EXIT_FAILURE;
    } else if(systemcode > HAUSY_ID_MAX || systemcode < 0) {
@@ -155,10 +157,15 @@ static int createCode(struct JsonNode *code) {
       return EXIT_FAILURE;
    }
 
-   // get max size of request
-   size_t data_size = state ?
-      relay_create_on(NULL, 0, 0) :
-      relay_create_off(NULL, 0, 0);
+   size_t data_size;
+
+   // get request size
+   if (command == RELAY_CMD_ON)
+      data_size = relay_create_on(NULL, 0, 0);
+   else if (command == RELAY_CMD_OFF)
+      data_size = relay_create_off(NULL, 0, 0);
+   else if (command == RELAY_CMD_STATE_QUERY)
+      data_size = relay_create_state_query(NULL, 0, 0);
 
    // allocate space for request
    hausy_bitstorage *data = hausy_allocate(data_size);
@@ -168,9 +175,13 @@ static int createCode(struct JsonNode *code) {
    }
 
    // build request, fill data
-   data_size = state ? 
-      relay_create_on(data, systemcode, unitcode) :
-      relay_create_off(data, systemcode, unitcode);
+   if (command == RELAY_CMD_ON)
+      data_size = relay_create_on(data, systemcode, unitcode);
+   else if (command == RELAY_CMD_OFF)
+      data_size = relay_create_off(data, systemcode, unitcode);
+   else if (command == RELAY_CMD_STATE_QUERY)
+      data_size = relay_create_state_query(data, systemcode, unitcode);
+
 
    // transform request to pilight
    hausy_relay->rawlen = hausy_pilight_create_timings(
@@ -179,7 +190,11 @@ static int createCode(struct JsonNode *code) {
       hausy_relay->raw
    );
 
-   createMessage(systemcode_str, unitcode_str, state);
+   if (command == RELAY_CMD_ON)
+      createMessage(systemcode_str, unitcode_str, 1);
+   else if (command == RELAY_CMD_OFF)
+      createMessage(systemcode_str, unitcode_str, 0);
+
    free(data);
 
    return EXIT_SUCCESS;
@@ -190,6 +205,7 @@ static void printHelp(void) {
    printf("\t -u --unitcode=unitcode\t\tcontrol a device with this unitcode\n");
    printf("\t -t --on\t\t\tsend an on signal\n");
    printf("\t -f --off\t\t\tsend an off signal\n");
+   printf("\t -q --query\t\t\tquery relay states\n");
 }
 
 #if !defined(MODULE) && !defined(_WIN32)
@@ -212,6 +228,7 @@ void hausyRelayInit(void) {
    options_add(&hausy_relay->options, 'u', "unitcode", OPTION_HAS_VALUE, DEVICES_ID, JSON_STRING, NULL, "^0a[0-9a-zA-Z_@]{1,5}$");
    options_add(&hausy_relay->options, 't', "on", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
    options_add(&hausy_relay->options, 'f', "off", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
+   options_add(&hausy_relay->options, 'q', "query", OPTION_NO_VALUE, DEVICES_STATE, JSON_STRING, NULL, NULL);
 
    options_add(&hausy_relay->options, 0, "readonly", OPTION_HAS_VALUE, GUI_SETTING, JSON_NUMBER, (void *)0, "^[10]{1}$");
    options_add(&hausy_relay->options, 0, "confirm", OPTION_HAS_VALUE, GUI_SETTING, JSON_NUMBER, (void *)0, "^[10]{1}$");
