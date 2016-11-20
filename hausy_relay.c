@@ -71,6 +71,8 @@ static void createMessage(char *systemcode_str, char *unitcode_str, int state) {
 static void parseCode(void) {
    hausy_bitstorage *data;
    size_t data_size = hausy_pilight_parse_timings(&data, hausy_relay->raw, hausy_relay->rawlen);
+   if (! data_size)
+      return;
 
    hausy_id protocol, toSystem, toUnit, command;
    size_t pos = hausy_parse_request(data, data_size, &protocol, &toSystem, &toUnit, &command);
