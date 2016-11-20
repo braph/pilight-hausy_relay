@@ -44,7 +44,7 @@
 #define MIN_PULSE_LENGTH   HAUSY_PULSE_LOW  - HAUSY_PULSE_TOLERANCE
 #define MAX_PULSE_LENGTH   HAUSY_PULSE_HIGH + HAUSY_PULSE_TOLERANCE
 #define MIN_RAW_LENGTH     ((4 * HAUSY_ID_BITLENGTH * 2) + 2)
-#define MAX_RAW_LENGTH     (MIN_RAW_LENGTH + (3 * HAUSY_ID_BITLENGTH))
+#define MAX_RAW_LENGTH     (MIN_RAW_LENGTH + (4 * 3 * HAUSY_ID_BITLENGTH))
 
 static int validate(void) {
    if (hausy_is_footer_pulse(hausy_relay->raw[hausy_relay->rawlen-1]) &&
