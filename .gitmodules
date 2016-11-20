@@ -1,0 +1,6 @@
+[submodule "pilight"]
+	path = pilight
+	url = https://github.com/pilight/pilight
+[submodule "hausy"]
+	path = hausy
+	url = https://github.com/braph/hausy
