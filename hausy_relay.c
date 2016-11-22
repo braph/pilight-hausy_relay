@@ -40,13 +40,18 @@
 #include "hausy/protocols/relay/relay.h"
 #include "hausy_relay.h"
 
-#define REPEATS            10
+#define REPEATS            30
 #define MIN_PULSE_LENGTH   HAUSY_PULSE_LOW  - HAUSY_PULSE_TOLERANCE
 #define MAX_PULSE_LENGTH   HAUSY_PULSE_HIGH + HAUSY_PULSE_TOLERANCE
 #define MIN_RAW_LENGTH     ((4 * HAUSY_ID_BITLENGTH * 2) + 2)
 #define MAX_RAW_LENGTH     (MIN_RAW_LENGTH + (4 * 3 * HAUSY_ID_BITLENGTH))
 
 static int validate(void) {
+   if (hausy_relay->rawlen < 3) {
+      logprintf(LOG_ERR, "eeeh rawlen < 3");
+      return -1;
+   }
+
    if (hausy_is_footer_pulse(hausy_relay->raw[hausy_relay->rawlen-1]) &&
        hausy_is_high_pulse(hausy_relay->raw[hausy_relay->rawlen-2])) {
       return 0;
@@ -111,13 +116,19 @@ static void parseCode(void) {
    }
 
    char *systemcode_str = hausy_create_id(systemcode);
+   logprintf(LOG_ERR, "created systemcode");
    char *unitcode_str   = hausy_create_id(unitcode);
+   logprintf(LOG_ERR, "created unitcode");
 
    createMessage(systemcode_str, unitcode_str, state);
+   logprintf(LOG_ERR, "created message");
 
    free(systemcode_str);
+   logprintf(LOG_ERR, "free() systemcode_str");
    free(unitcode_str);
+   logprintf(LOG_ERR, "free() unitcode_str");
    free(data);
+   logprintf(LOG_ERR, "free() data");
 }
 
 static int createCode(struct JsonNode *code) {
@@ -189,8 +200,6 @@ static int createCode(struct JsonNode *code) {
       data_size,
       hausy_relay->raw
    );
-
-   hausy_relay->txrpt = REPEATS;
 
    if (command == RELAY_CMD_ON)
       createMessage(systemcode_str, unitcode_str, 1);
