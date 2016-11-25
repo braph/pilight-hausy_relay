@@ -47,11 +47,13 @@
 #define MAX_RAW_LENGTH     (MIN_RAW_LENGTH + (4 * 3 * HAUSY_ID_BITLENGTH))
 
 static int validate(void) {
+   logprintf(LOG_ERR, "validate()");
    if (hausy_relay->rawlen < 3) {
       logprintf(LOG_ERR, "eeeh rawlen < 3");
       return -1;
    }
 
+   logprintf(LOG_ERR, "check footer()");
    if (hausy_is_footer_pulse(hausy_relay->raw[hausy_relay->rawlen-1]) &&
        hausy_is_high_pulse(hausy_relay->raw[hausy_relay->rawlen-2])) {
       return 0;
@@ -61,6 +63,7 @@ static int validate(void) {
 }
 
 static void createMessage(char *systemcode_str, char *unitcode_str, int state) {
+   logprintf(LOG_ERR, "createMessage()");
    hausy_relay->message = json_mkobject();
 
    json_append_member(hausy_relay->message, "systemcode", json_mkstring(systemcode_str));
@@ -74,34 +77,42 @@ static void createMessage(char *systemcode_str, char *unitcode_str, int state) {
 }
 
 static void parseCode(void) {
+   logprintf(LOG_ERR, "parseCode()");
    hausy_bitstorage *data;
+   logprintf(LOG_ERR, "parse_timings()");
    size_t data_size = hausy_pilight_parse_timings(&data, hausy_relay->raw, hausy_relay->rawlen);
    if (! data_size)
       return;
 
    hausy_id protocol, toSystem, toUnit, command;
+   logprintf(LOG_ERR, "parse_request()");
    size_t pos = hausy_parse_request(data, data_size, &protocol, &toSystem, &toUnit, &command);
    if (! pos) {
+      logprintf(LOG_ERR, "!pos");
       free(data);
       return;
    }
 
    if (protocol != (hausy_id) RELAY_PROTOCOL_ID) {
+      logprintf(LOG_ERR, "!protocol");
       free(data);
       return;
    }
 
    if (command != (hausy_id) RELAY_CMD_STATE_INFORM) {
+      logprintf(LOG_ERR, "!protocol");
       free(data);
       return;
    }
 
    if (toSystem != (hausy_id) HAUSY_BROADCAST_ID) {
+      logprintf(LOG_ERR, "!toSystem");
       free(data);
       return;
    }
 
    if (toUnit != (hausy_id) HAUSY_BROADCAST_ID) {
+      logprintf(LOG_ERR, "!toUnit");
       free(data);
       return;
    }
@@ -109,8 +120,10 @@ static void parseCode(void) {
    hausy_id systemcode, unitcode;
    hausy_bool state;
 
+   logprintf(LOG_ERR, "parse_state_inform()");
    pos = relay_parse_state_inform(data, data_size, pos, &systemcode, &unitcode, &state);
    if (! pos) {
+      logprintf(LOG_ERR, "parse_state_inform(): !pos");
       free(data);
       return;
    }
